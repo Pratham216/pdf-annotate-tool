@@ -383,15 +383,17 @@ export default function PdfViewer() {
     }
 
     // Save all annotated pages as a single PDF
-        // Save all annotated pages as a single PDF
-        const handleSave = async () => {
-            if (!pdfFile || !pdfCanvasRef.current || !annotationCanvasRef.current) return;
-            setSavingPdf(true); // Start loading state
-    
-            // Ensure current page's annotations are saved to pageAnnotations state before saving all pages
-            setPageAnnotations(prev => ({ ...prev, [currentPage]: shapes }));
-    
-            const pdfjsLib = await import('pdfjs-dist');
+    const handleSave = async () => {
+        if (!pdfFile || !pdfCanvasRef.current || !annotationCanvasRef.current) return;
+        setSavingPdf(true); // Start loading state
+
+        // Create a consolidated annotations object including the current page's shapes
+        const allAnnotationsToSave = {
+            ...pageAnnotations,
+            [currentPage]: shapes
+        };
+
+        const pdfjsLib = await import('pdfjs-dist');
         pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
         const originalPdf = await pdfjsLib.getDocument(pdfFile).promise;
@@ -434,8 +436,8 @@ export default function PdfViewer() {
             annotationPageCanvas.width = viewport.width;
             annotationPageCanvas.height = viewport.height;
 
-            // Draw annotations for the current page from pageAnnotations state
-            const currentPageShapes = pageAnnotations[i] || [];
+            // Draw annotations for the current page from the consolidated annotations object
+            const currentPageShapes = allAnnotationsToSave[i] || [];
             currentPageShapes.forEach(shape => drawShape(annotationPageCtx, shape));
 
             // Combine PDF page and annotations onto a final canvas
