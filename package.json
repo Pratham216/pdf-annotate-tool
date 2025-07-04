@@ -9,13 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/zoom": "^3.12.0",
+    "fabric": "^6.7.0",
     "next": "15.3.5",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^3.4.120",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-colorful": "^5.6.1",
+    "react-dom": "^19.0.0",
+    "react-dropzone": "^14.3.8",
+    "react-pdf": "^10.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.1.11",
     "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
@@ -23,4 +31,3 @@
     "tailwindcss": "^4.1.11"
   }
 }
-
