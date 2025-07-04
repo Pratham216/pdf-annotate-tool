@@ -1,4 +1,19 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+
 export default function CTA() {
+  const router = useRouter();
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      const fileUrl = URL.createObjectURL(file);
+      sessionStorage.setItem('uploadedPdfUrl', fileUrl);
+      router.push('/editor');
+    }
+  };
+
   return (
     <section className="bg-blue-600 py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -13,6 +28,7 @@ export default function CTA() {
                 <input
                   type="file"
                   accept=".pdf"
+                  onChange={handleFileUpload}
                   className="block w-full rounded-md border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
                   placeholder="Select PDF file"
                 />

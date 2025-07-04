@@ -20,7 +20,7 @@ export default function PdfViewer() {
     const pdfCanvasRef = useRef(null)
     const annotationCanvasRef = useRef(null)
     const renderTaskRef = useRef(null) // To track PDF.js render task
-    const [scale, setScale] = useState(1.0)
+    const [scale, setScale] = useState(1.0) // Adjusted default zoom to 100%
     const [pdfDimensions, setPdfDimensions] = useState({ width: 0, height: 0 })
     const [activeTool, setActiveTool] = useState(TOOLS.DRAW)
     const [color, setColor] = useState('#FF0000') // Main color for drawing, shapes, text stroke
@@ -42,56 +42,78 @@ export default function PdfViewer() {
     // Store annotations per page (simple in-memory, can be extended to IndexedDB/backend)
     const [pageAnnotations, setPageAnnotations] = useState({})
 
+    // Check for uploaded PDF from session storage on component mount
+    useEffect(() => {
+        const uploadedPdfUrl = sessionStorage.getItem('uploadedPdfUrl');
+        if (uploadedPdfUrl) {
+            setPdfFile(uploadedPdfUrl);
+            sessionStorage.removeItem('uploadedPdfUrl'); // Clean up session storage
+        }
+    }, []); // Run only once on mount
+
     // Handle PDF upload and initial rendering
     const handleFileChange = async (e) => {
         const file = e.target.files[0]
         if (file && file.type === 'application/pdf') {
+            console.log('PDF file selected:', file.name); // Debug log
             const fileUrl = URL.createObjectURL(file)
             setPdfFile(fileUrl)
             setCurrentPage(1)
             setPageAnnotations({}) // Clear all annotations for new PDF
             setShapes([]) // Clear current page shapes
-            await renderPdf(fileUrl, 1, scale)
         }
     }
 
     const renderPdf = async (url, pageNum, scaleVal) => {
+        console.log(`Attempting to render PDF page ${pageNum} at scale ${scaleVal}`); // Debug log
         const pdfjsLib = await import('pdfjs-dist')
         pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
-        const pdf = await pdfjsLib.getDocument(url).promise
-        setNumPages(pdf.numPages)
-        const page = await pdf.getPage(pageNum)
-        const viewport = page.getViewport({ scale: scaleVal })
-
-        // Set PDF canvas dimensions
-        pdfCanvasRef.current.width = viewport.width
-        pdfCanvasRef.current.height = viewport.height
-        setPdfDimensions({ width: viewport.width, height: viewport.height })
-
-        const renderContext = {
-            canvasContext: pdfCanvasRef.current.getContext('2d'),
-            viewport: viewport
-        }
-
-        // Cancel previous render if still running to prevent "Cannot use the same canvas" error
-        if (renderTaskRef.current) {
-            renderTaskRef.current.cancel();
-        }
-
-        // Start new render and track it
-        const renderTask = page.render(renderContext);
-        renderTaskRef.current = renderTask;
         try {
+            const pdf = await pdfjsLib.getDocument(url).promise
+            console.log('PDF document loaded successfully.'); // Debug log
+            setNumPages(pdf.numPages)
+            const page = await pdf.getPage(pageNum)
+            const viewport = page.getViewport({ scale: scaleVal })
+
+            // Set PDF canvas dimensions
+            if (pdfCanvasRef.current) { // Check if ref is available
+                pdfCanvasRef.current.width = viewport.width
+                pdfCanvasRef.current.height = viewport.height
+            } else {
+                console.error('pdfCanvasRef.current is null during render.');
+            }
+            setPdfDimensions({ width: viewport.width, height: viewport.height })
+
+            const renderContext = {
+                canvasContext: pdfCanvasRef.current?.getContext('2d'), // Use optional chaining
+                viewport: viewport
+            }
+
+            if (!renderContext.canvasContext) {
+                console.error('Canvas context not available for rendering.');
+                return;
+            }
+
+            // Cancel previous render if still running to prevent "Cannot use the same canvas" error
+            if (renderTaskRef.current) {
+                renderTaskRef.current.cancel();
+            }
+
+            // Start new render and track it
+            const renderTask = page.render(renderContext);
+            renderTaskRef.current = renderTask;
             await renderTask.promise;
+            console.log('PDF page rendered successfully.'); // Debug log
+            renderTaskRef.current = null; // Clear task when complete
         } catch (err) {
             // Ignore cancellation errors
             if (err.name === 'RenderingCancelledException') {
+                console.warn('PDF rendering cancelled.');
                 return;
             }
-            console.error('Error rendering PDF page:', err);
+            console.error('Error during PDF loading or rendering:', err); // Catch and log all errors
         }
-        renderTaskRef.current = null; // Clear task when complete
     }
 
     // Re-render PDF when file, page, or scale changes
@@ -361,11 +383,15 @@ export default function PdfViewer() {
     }
 
     // Save all annotated pages as a single PDF
-    const handleSave = async () => {
-        if (!pdfFile || !pdfCanvasRef.current || !annotationCanvasRef.current) return;
-        setSavingPdf(true); // Start loading state
-
-        const pdfjsLib = await import('pdfjs-dist');
+        // Save all annotated pages as a single PDF
+        const handleSave = async () => {
+            if (!pdfFile || !pdfCanvasRef.current || !annotationCanvasRef.current) return;
+            setSavingPdf(true); // Start loading state
+    
+            // Ensure current page's annotations are saved to pageAnnotations state before saving all pages
+            setPageAnnotations(prev => ({ ...prev, [currentPage]: shapes }));
+    
+            const pdfjsLib = await import('pdfjs-dist');
         pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
         const originalPdf = await pdfjsLib.getDocument(pdfFile).promise;
@@ -484,10 +510,10 @@ export default function PdfViewer() {
                     <input type="number" min="8" max="48" value={fontSize} onChange={e => setFontSize(Number(e.target.value))} className="w-14 px-1 border rounded" title="Font size" />
                     <span className="text-xs">px</span>
                 </div>
-                <button className="px-3 py-1 rounded bg-gray-200 ml-2 cursor-pointer" onClick={handleClear}>Clear</button>
-                <button className="px-3 py-1 rounded bg-gray-200 ml-2 cursor-pointer" onClick={handleUndo} disabled={undoStack.length === 0}>Undo</button>
-                <button className="px-3 py-1 rounded bg-gray-200 ml-2 cursor-pointer" onClick={handleRedo} disabled={redoStack.length === 0}>Redo</button>
-                <button 
+                <button className="px-3 py-1 rounded bg-gray-200 ml-2 cursor-pointer " onClick={handleClear}>Clear</button>
+                <button className="px-3 py-1 rounded bg-gray-200 ml-2 cursor-pointer " onClick={handleUndo} disabled={undoStack.length === 0}>Undo</button>
+                <button className="px-3 py-1 rounded bg-gray-200 ml-2 cursor-pointer " onClick={handleRedo} disabled={redoStack.length === 0}>Redo</button>
+                    <button
                     className={`px-3 py-1 rounded bg-green-600 text-white ml-2 ${savingPdf ? 'cursor-not-allowed opacity-70' : 'hover:bg-green-700 cursor-pointer'}`}
                     onClick={handleSave}
                     disabled={!pdfFile || savingPdf}
@@ -495,12 +521,12 @@ export default function PdfViewer() {
                     {savingPdf ? 'Saving...' : 'Save'}
                 </button>
                 <div className="flex items-center gap-2 ml-2">
-                    <button className="px-3 py-1 rounded bg-blue-300 hover:bg-blue-400 cursor-pointer" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
+                    <button className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
                     <span>Page {currentPage} / {numPages}</span>
-                    <button className="px-3 py-1 rounded bg-blue-300 hover:bg-blue-400 cursor-pointer" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === numPages}>Next</button>
-                    <button className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300" onClick={() => setScale(s => Math.max(0.5, s - 0.25))}>-</button>
+                    <button className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === numPages}>Next</button>
+                    <button className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer" onClick={() => setScale(s => Math.max(0.5, s - 0.25))}>-</button>
                     <span>Zoom: {(scale * 100).toFixed(0)}%</span>
-                    <button className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300" onClick={() => setScale(s => Math.min(4, s + 0.25))}>+</button>
+                    <button className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer" onClick={() => setScale(s => Math.min(4, s + 0.25))}>+</button>
                 </div>
             </div>
             {/* PDF Viewer Area */}
