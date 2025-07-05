@@ -7,12 +7,9 @@ const nextConfig = {
     config.resolve.alias.encoding = false;
     return config;
   },
-  // Disable server-side rendering for PDF viewer
-  experimental: {
-    serverComponentsExternalPackages: ['pdfjs-dist'],
-  },
-  // Enable ES modules for PDF.js
-  transpilePackages: ['pdfjs-dist'],
+  // Move this out of experimental and rename
+  serverExternalPackages: ['pdfjs-dist'],
+  // Remove transpilePackages for pdfjs-dist to avoid conflict
 }
 
 export default nextConfig
