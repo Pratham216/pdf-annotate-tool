@@ -1,11 +1,4 @@
 'use client'
-import dynamic from 'next/dynamic'
-
-const PdfViewer = dynamic(
-  () => import('./PdfViewerComponent'),
-  { ssr: false }
-)
-
 import { useState, useRef, useEffect } from 'react'
 import '@react-pdf-viewer/core/lib/styles/index.css'
 import jsPDF from 'jspdf' // Make sure you have installed jspdf: npm install jspdf
