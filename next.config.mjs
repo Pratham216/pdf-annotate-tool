@@ -15,4 +15,4 @@ const nextConfig = {
   transpilePackages: ['pdfjs-dist'],
 }
 
-module.exports = nextConfig
+export default nextConfig
