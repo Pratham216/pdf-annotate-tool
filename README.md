@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# PDF Annotate Tool
 
-## Getting Started
+A browser-based PDF annotation tool built with Next.js.  
+You can upload a PDF, draw, highlight, add shapes, comments, and text, then export your annotated PDF.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Setup Instructions
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Pratham216/pdf-annotate-tool.git
+   cd pdf-annotate-tool
+   ```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-## Learn More
+4. **Open your browser:**
+   Visit [http://localhost:3000](http://localhost:3000)
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📝 How This Project Works
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Upload a PDF:**  
+  Use the "Upload PDF" button on the homepage or editor toolbar. The file is loaded in the browser (no server upload).
 
-## Deploy on Vercel
+- **Annotate:**  
+  Use the toolbar to select tools: Draw, Line, Rectangle, Circle, Arrow, Highlight, Comment, or Text.  
+  Draw or click on the PDF to add annotations.  
+  Comments and text can be edited in popups.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Undo/Redo/Clear:**  
+  Use the toolbar buttons to undo, redo, or clear annotations on the current page.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Page Navigation & Zoom:**  
+  Navigate between PDF pages and zoom in/out using the toolbar.
+
+- **Save:**  
+  Click "Save" to export your annotated PDF.  
+  All annotations are rendered onto the PDF pages and downloaded as a new PDF.
+
+---
+
+## 🛠️ Tech Stack
+
+- [Next.js](https://nextjs.org/) (App Router)
+- [pdfjs-dist](https://github.com/mozilla/pdf.js) for PDF rendering
+- [jsPDF](https://github.com/parallax/jsPDF) for PDF export
+- React hooks for state management
+
+---
+
+## 📦 Deployment
+
+You can deploy this project on [Vercel](https://vercel.com/) or any platform that supports Next.js.
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+**Enjoy annotating your PDFs!**
