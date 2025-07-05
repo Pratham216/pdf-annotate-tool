@@ -27,7 +27,6 @@
     "@tailwindcss/postcss": "^4.1.11",
     "@types/node": "^24.0.10",
     "autoprefixer": "^10.4.21",
-    "canvas": "^2.11.2",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
     "postcss": "^8.5.6",

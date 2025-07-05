@@ -1,20 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  webpack: (config, { isServer }) => {
-    // Important: prevent PDF.js from trying to use canvas on the server
-    if (!isServer) {
-      config.resolve.alias.canvas = false;
-      config.resolve.alias.encoding = false;
-    }
-    
-    // Add support for PDF.js worker
-    config.plugins.push(
-      new config.webpack.ProvidePlugin({
-        process: 'process/browser',
-      })
-    );
-    
+  webpack: (config) => {
+    // Important: prevent PDF.js from trying to use canvas
+    config.resolve.alias.canvas = false;
+    config.resolve.alias.encoding = false;
     return config;
   },
   // Disable server-side rendering for PDF viewer
