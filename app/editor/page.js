@@ -1,5 +1,5 @@
 'use client'
-import PdfViewer from '../components/PdfViewer'
+import PdfViewer from '../components/PdfViewerComponent'
 import Header from '../components/Header'
 
 export default function EditorPage() {
